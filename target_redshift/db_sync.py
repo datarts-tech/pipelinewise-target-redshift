@@ -254,6 +254,7 @@ class DbSync:
 
         self.s3 = aws_session.client('s3')
         self.skip_updates = self.connection_config.get('skip_updates', False)
+        self.primary_key_required = self.connection_config.get('primary_key_required', True)
 
         self.schema_name = None
         self.grantees = None
@@ -470,7 +471,7 @@ class DbSync:
                 # Step 5/a: Insert or Update if primary key defined
                 #           Do UPDATE first and second INSERT to calculate
                 #           the number of affected rows correctly
-                if len(stream_schema_message['key_properties']) > 0:
+                if len(stream_schema_message['key_properties']) > 0 and self.primary_key_required:
                     # Step 5/a/1: Update existing records
                     if not self.skip_updates:
                         update_sql = """UPDATE {}
